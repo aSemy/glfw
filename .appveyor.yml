@@ -52,9 +52,9 @@ for:
     build_script:
         - cmake -S . -B build -G "%GENERATOR%" -DBUILD_SHARED_LIBS=%BUILD_SHARED_LIBS%
         - cmake --build build --target glfw
-notifications:
-    - provider: Email
-      to:
-        - ci@glfw.org
-      on_build_failure: true
-      on_build_success: false
+# notifications:
+#     - provider: Email
+#       to:
+#         - ci@glfw.org
+#       on_build_failure: true
+#       on_build_success: false

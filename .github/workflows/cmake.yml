@@ -41,7 +41,10 @@ jobs:
       run: cmake --build build
       
     - name: 'Upload Artifact'
-      uses: actions/download-artifact@v2
+      uses: actions/upload-artifact@v2
+      with:
+        name: 'artifact'
+        path: ${{github.workspace}} # or path/to/artifact
 #     - name: Test
 #       working-directory: ${{github.workspace}}/build
 #       shell: bash

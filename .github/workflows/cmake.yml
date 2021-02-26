@@ -66,6 +66,10 @@ jobs:
           echo "::set-output name=flags::${{ env.GLFW_SLIM_BUILD_FLAGS }}"
         fi
         
+    - name: debug2
+      run: |
+        echo ${{ steps.glfw_build_opts.flags }}
+        
     - name: Print job details
       run: |
         [ -n ${{ github.event_name }} ] && echo 'Event: ${{ github.event_name }}; fi'
@@ -80,14 +84,14 @@ jobs:
 
     - name: Configure CMake
       run: |
-        echo "::group::"
+        echo "::group::cmake, with flags ${{ steps.glfw_build_opts.flags }}"
         cmake -S . -B build -G "Visual Studio 16 2019" ${{ steps.glfw_build_opts.flags }}
         echo "::endgroup::"
 
     - name: cmake build
       # build into the 'build' directory
       run: |
-        echo "::group::"
+        echo "::group::cmake --build build"
         cmake --build build
         echo "::endgroup::"
   

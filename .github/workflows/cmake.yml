@@ -1,13 +1,35 @@
-name: CMake
+name: CMake GLFW latest
 
-on: [push]
+# The cmake commands are from:
+# https://github.com/glfw/glfw/blob/master/.appveyor.yml
+# Windows image is used 'just in case'. From what I gather the 
+# resulting .dll is system agnostic, but I don't really know.
+
+# run this build on any edit in the repo
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      fullBuild:
+        description: 'True: Build all files (docs, tests, examples), False: just dll'
+        required: true
+        default: false
 
 env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
+  # Key for glfw version, and file that contains it
+  CMAKE_CACHE_FILE:     ./CMakeCache.txt
+  GLFW_VERSION_KEY:     CMAKE_PROJECT_VERSION:STATIC
+  # build options
+  GLFW_IS_FULL_BUILD:   ${{ github.event.inputs.fullBuild }}
+  GLFW_BUILD_OPTS:      -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF
+  GLFW_FULL_BUILD_OPTS: -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON 
 
+defaults:
+  run:
+    shell: bash
+    
 jobs:
-  build:
+  build_glfw:
     # The CMake configure and build commands are platform agnostic and should work equally
     # well on Windows or Mac.  You can convert this to a matrix build if you need
     # cross-platform coverage.
@@ -15,39 +37,54 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+    
+    - name: Set build options
+      id: glfw_build_opts
+      run: |
+        if [ $GLFW_IS_FULL_BUILD ]
+          echo "::set-output name=flags::$GLFW_FULL_BUILD_OPTS"
+        elif
+          echo "::set-output name=flags::$GLFW_BUILD_OPTS"
+        
+    - name: Job details
+      run: |
+        [ -n ${{github.event_name}} ] && echo 'Event: ${{github.event_name}}; fi'
+        [ -n ${{github.actor}} ] && echo 'User: ${{github.actor}}; fi'
+        echo "Repo head ref: ${{ github.head_ref }}"
+        echo "Full build: ${{ github.event.inputs.fullBuild }}"
+        echo "Build options: ${{ glfw_build_opts }}"
+
+      # checkout your project
+    - name: 'Project checkout ${{github.repository}}'
+      uses: actions/checkout@v2
 
     - name: Create Build Environment
-#       # Some projects don't allow in-source building, so create a separate build directory
-#       # We'll use this as our working directory for all subsequent commands
-      run: cmake -E make_directory ${{github.workspace}}/build
+      # create a folder - 'build' - into which GLFW will be build
+      run: cmake -E make_directory build
 
     - name: Configure CMake
-      # Use a bash shell so we can use the same syntax for environment variable
-      # access regardless of the host operating system
-      shell: bash
-#       working-directory: ${{github.workspace}}/build
-      working-directory: ${{github.workspace}}
-      # Note the current convention is to use the -S and -B options here to specify source 
-      # and build directories, but this is only available with CMake 3.13 and higher.  
-      # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-#       run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-      run: cmake -S . -B build -G "Visual Studio 16 2019" -DBUILD_SHARED_LIBS=ON
+      # BUILD_SHARED_LIBS=ON builds the .dll - =OFF might be suitable for other situations?
+      run: cmake -S . -B build -G "Visual Studio 16 2019" ${{ glfw_build_opts.flags }}
 
-    - name: Build
-      working-directory: ${{github.workspace}}
-      shell: bash
-      # Execute the build.  You can specify a specific target with "--target <NAME>"
+    - name: cmake build
+      # build into the 'build' directory
       run: cmake --build build
-      
-    - name: 'Upload Artifact'
+  
+    - name: Get glfw version
+      run: |
+        v = awk -F= '/^$GLFW_VERSION_KEY/{print $NF}' $CMAKE_CACHE_FILE
+        echo "::set-output name=glfw_version::$v"
+        ver >> $GITHUB_ENV
+  
+    - uses: actions/upload-artifact@v2
+      # why is the .dll in a 'Debug' folder?
+      with:
+        path: build/src/Debug/glfw3.dll 
+        
+    - name: 'Upload build folder v${{ env.glfw_version }}'
+      # 
       uses: actions/upload-artifact@v2
       with:
-        name: 'artifact'
-        path: build/ # or path/to/artifact
-#     - name: Test
-#       working-directory: ${{github.workspace}}/build
-#       shell: bash
-#       # Execute tests defined by the CMake configuration.  
-#       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-#       run: ctest -C $BUILD_TYPE
+        name: 'build_v${{ env.glfw_version }}'
+        path: build/ 
+        

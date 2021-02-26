@@ -48,7 +48,9 @@ jobs:
                    "upload_name": "build_dir"
                 }
                 matrix.append(extras)
+            matrix = { "include" : matrix }
             print('::set-output name=matrix::json.dumps(matrix)')
+      - run: echo ${{ steps.prep.outputs.matrix }}
 
   build_glfw:
     # The CMake configure and build commands are platform agnostic and should work equally
@@ -59,8 +61,7 @@ jobs:
     needs: prepare
     
     strategy:
-      matrix:
-        include: ${{fromJson(needs.prepare.outputs.matrix)}}
+      matrix: ${{fromJson(needs.prepare.outputs.matrix)}}
     
 #       matrix:
 #         target: ['dll', 'extras']

@@ -55,7 +55,7 @@ jobs:
     - name: Set build options
       id: glfw_build_opts
       run: |
-        version=awk -F " " '/GLFW VERSION/{print $(NF-2)}' < ${{ env.cmake_lists_file }}
+        version=`awk -F " " '/GLFW VERSION/{print $(NF-2)}' < ${{ env.cmake_lists_file }}`
         echo "::set-output name=version::$version"
         if [ $INPUT_ISFULLBUILD }} ] then
           echo "::set-output name=flags::$GLFW_SLIM_BUILD_FLAGS"

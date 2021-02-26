@@ -28,9 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix_include: ${{ steps.prep.outputs.matrix }}
-    defaults:
-      run:
-        shell: python
     steps:
       - shell: python
         run: | 
@@ -48,7 +45,7 @@ jobs:
                    "upload_name": "build_dir"
                 }
                 matrix.append(extras)
-            matrix = { "include" : matrix }
+            # matrix = { "include" : matrix }
             print('::set-output name=matrix::json.dumps(matrix)')
       - run: echo ${{ steps.prep.outputs.matrix }}
 
@@ -61,7 +58,8 @@ jobs:
     needs: prepare
     
     strategy:
-      matrix: ${{fromJson(needs.prepare.outputs.matrix)}}
+      matrix: 
+        include: ${{fromJson(needs.prepare.outputs.matrix_include)}}
     
 #       matrix:
 #         target: ['dll', 'extras']

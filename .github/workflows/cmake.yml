@@ -17,11 +17,11 @@ on:
 
 env:
   # Key for glfw version, and file that contains it
-  CMAKE_CACHE_FILE:     ./CMakeCache.txt
+  CMAKE_LISTS_FILE:     ./CMakeLists.txt
   GLFW_VERSION_KEY:     CMAKE_PROJECT_VERSION:STATIC
   # build options
   GLFW_IS_FULL_BUILD:   ${{ github.event.inputs.fullBuild }}
-  GLFW_BUILD_OPTS:      -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF
+  GLFW_SLIM_BUILD_OPTS: -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF
   GLFW_FULL_BUILD_OPTS: -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON 
 
 defaults:
@@ -41,18 +41,19 @@ jobs:
     - name: Set build options
       id: glfw_build_opts
       run: |
+        version = awk -F " " '/GLFW VERSION/{print $(NF-2)}' < $CMAKE_LISTS_FILE
         if [ $GLFW_IS_FULL_BUILD ]
           echo "::set-output name=flags::$GLFW_FULL_BUILD_OPTS"
         elif
-          echo "::set-output name=flags::$GLFW_BUILD_OPTS"
+          echo "::set-output name=flags::$GLFW_SLIM_BUILD_OPTS"
         
     - name: Job details
       run: |
-        [ -n ${{github.event_name}} ] && echo 'Event: ${{github.event_name}}; fi'
-        [ -n ${{github.actor}} ] && echo 'User: ${{github.actor}}; fi'
+        [ -n ${{ github.event_name }} ] && echo 'Event: ${{ github.event_name }}; fi'
+        [ -n ${{ github.actor }} ]      && echo 'User: ${{ github.actor }};       fi'
         echo "Repo head ref: ${{ github.head_ref }}"
-        echo "Full build: ${{ github.event.inputs.fullBuild }}"
-        echo "Build options: ${{ glfw_build_opts }}"
+        echo "Full build:    ${{ github.event.inputs.fullBuild }}"
+        echo "Build options: ${{ steps.glfw_build_opts }}"
 
       # checkout your project
     - name: 'Project checkout ${{github.repository}}'
@@ -64,13 +65,14 @@ jobs:
 
     - name: Configure CMake
       # BUILD_SHARED_LIBS=ON builds the .dll - =OFF might be suitable for other situations?
-      run: cmake -S . -B build -G "Visual Studio 16 2019" ${{ glfw_build_opts.flags }}
+      run: cmake -S . -B build -G "Visual Studio 16 2019" ${{ steps.glfw_build_opts.flags }}
 
     - name: cmake build
       # build into the 'build' directory
       run: cmake --build build
   
     - name: Get glfw version
+      
       run: |
         v = awk -F= '/^$GLFW_VERSION_KEY/{print $NF}' $CMAKE_CACHE_FILE
         echo "::set-output name=glfw_version::$v"

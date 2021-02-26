@@ -57,6 +57,11 @@ jobs:
       run: |
         version=`awk -F " " '/GLFW VERSION/{print $(NF-2)}' < ${{ env.cmake_lists_file }}`
         echo "::set-output name=version::$version"
+        
+        echo $version
+        echo "${{ env.GLFW_FULL_BUILD_FLAGS }}"
+        echo "${{ env.GLFW_SLIM_BUILD_FLAGS }}"
+        
         if [ $INPUT_ISFULLBUILD ] 
         then
           echo "Creating full build"

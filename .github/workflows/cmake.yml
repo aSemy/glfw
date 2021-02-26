@@ -48,7 +48,7 @@ jobs:
                    "upload_name": "build_dir"
                 }
                 matrix.append(extras)
-            print('::set-output name={matrix}::{json.dumps(matrix)}')
+            print('::set-output name=matrix::json.dumps(matrix)')
 
   build_glfw:
     # The CMake configure and build commands are platform agnostic and should work equally

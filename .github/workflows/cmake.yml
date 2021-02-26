@@ -140,6 +140,18 @@ jobs:
         cmake -S . -B build -G "Visual Studio 16 2019" ${{ matrix.build_flags }}
         echo "::endgroup::"
 
+    - name: Set build options2
+      run: |
+        echo "::group::{cmake -N -L}"
+        cmake -N -L -B build
+        echo "::endgroup::"
+        echo "::group::{cmake -N -LA}"
+        cmake -N -LA -B build
+        echo "::endgroup::"
+        echo "::group::{cmake -N -LH}"
+        cmake -N -LH -B build
+        echo "::endgroup::"
+
     - name: cmake build
       # build into the 'build' directory
       run: |

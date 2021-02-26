@@ -37,14 +37,14 @@ jobs:
             dll = {
                 "build_flags": "-DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF",
                 "upload_target": "./build/src/Debug/glfw3.dll",
-                "upload_prefix": "glfw3.dll"
+                "upload_name_prefix": "glfw3.dll"
             }
             matrix.append(dll)
             if [ ${{ github.event.inputs.extrasGen }} ] :
                 extras = {
                    "build_flags": "-DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON",
                    "upload_target": "./build/",
-                   "upload_name": "build_dir"
+                   "upload_name_prefix": "build_dir"
                 }
                 matrix.append(extras)
             matrix = json.dumps(matrix)
@@ -118,13 +118,13 @@ jobs:
       id: glfw_build_opts
       run: |
         echo "::group::{cmake -N -L}"
-        cmake -N -L
+        cmake -N -L -B build
+        echo "::endgroup::"
         echo "::group::{cmake -N -LA}"
+        cmake -N -LA -B build
         echo "::endgroup::"
-        cmake -N -LA
         echo "::group::{cmake -N -LH}"
-        echo "::endgroup::"
-        cmake -N -LH
+        cmake -N -LH -B build
         echo "::endgroup::"
         version=`awk -F " " '/GLFW VERSION/{print $(NF-2)}' < ./CMakeLists.txt`
         echo "Extracted GLFW version $version"

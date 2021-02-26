@@ -27,6 +27,7 @@ env:
 defaults:
   run:
     shell: bash
+    working-directory: ${{github.workspace}}
     
 jobs:
   build_glfw:

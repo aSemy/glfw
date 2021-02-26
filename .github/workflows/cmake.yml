@@ -60,7 +60,7 @@ jobs:
     
     strategy:
       matrix:
-       includes: ${{fromJson(needs.prepare.outputs.matrix)}}
+        include: ${{fromJson(needs.prepare.outputs.matrix)}}
     
 #       matrix:
 #         target: ['dll', 'extras']

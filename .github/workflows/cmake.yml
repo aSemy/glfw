@@ -49,7 +49,7 @@ jobs:
                 matrix.append(extras)
             matrix = json.dumps(matrix)
             print(matrix)
-            print('::set-output name=matrix::matrix')
+            print(f"::set-output name=matrix::{matrix}")
       - run: echo ${{ steps.prep.outputs.matrix }}
 
   build_glfw:

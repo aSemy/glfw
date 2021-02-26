@@ -46,8 +46,9 @@ jobs:
                    "upload_name": "build_dir"
                 }
                 matrix.append(extras)
-            # matrix = { "include" : matrix }
-            print('::set-output name=matrix::json.dumps(matrix)')
+            matrix = json.dumps(matrix)
+            print(matrix)
+            print('::set-output name=matrix::matrix')
       - run: echo ${{ steps.prep.outputs.matrix }}
 
   build_glfw:

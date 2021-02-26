@@ -17,7 +17,7 @@ on:
 
 env:
   # Key for glfw version, and file that contains it
-  cmake_lists_file:     ./CMakeLists.txt
+  CMAKE_LISTS_FILE:      ./CMakeLists.txt
   # build options
   GLFW_SLIM_BUILD_FLAGS: -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF
   GLFW_FULL_BUILD_FLAGS: -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON 
@@ -41,7 +41,7 @@ jobs:
     - name: 'Project checkout ${{github.repository}}'
       uses: actions/checkout@v2
     
-    - name: test
+    - name: debug
       run: |
         pwd
         echo "::group::{tree pwd}"
@@ -59,14 +59,15 @@ jobs:
         echo "::set-output name=version::$version"
         if [ $INPUT_ISFULLBUILD ] 
         then
-          echo "::set-output name=flags::$GLFW_SLIM_BUILD_FLAGS"
+          echo "Creating full build"
+          echo "::set-output name=flags::${{ env.GLFW_FULL_BUILD_FLAGS }}"
         else
-          echo "::set-output name=flags::$GLFW_FULL_BUILD_FLAGS"
+          echo "Creating slim (dll) build"
+          echo "::set-output name=flags::${{ env.GLFW_SLIM_BUILD_FLAGS }}"
         fi
         
     - name: Print job details
       run: |
-        pwd
         [ -n ${{ github.event_name }} ] && echo 'Event: ${{ github.event_name }}; fi'
         [ -n ${{ github.actor }} ]      && echo 'User: ${{ github.actor }};       fi'
         echo "Repo head ref: ${{ github.head_ref }}"
@@ -78,12 +79,17 @@ jobs:
       run: cmake -E make_directory build
 
     - name: Configure CMake
-      # BUILD_SHARED_LIBS=ON builds the .dll - =OFF might be suitable for other situations?
-      run: cmake -S . -B build -G "Visual Studio 16 2019" ${{ steps.glfw_build_opts.flags }}
+      run: |
+        echo "::group::"
+        cmake -S . -B build -G "Visual Studio 16 2019" ${{ steps.glfw_build_opts.flags }}
+        echo "::endgroup::"
 
     - name: cmake build
       # build into the 'build' directory
-      run: cmake --build build
+      run: |
+        echo "::group::"
+        cmake --build build
+        echo "::endgroup::"
   
     - uses: actions/upload-artifact@v2
       # why is the .dll in a 'Debug' folder?

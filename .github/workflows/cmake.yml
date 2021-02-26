@@ -1,52 +1,87 @@
-name: CMake GLFW latest
+name: Build GLFW latest
 
+# Build https://github.com/glfw/glfw/
 # The cmake commands are from:
 # https://github.com/glfw/glfw/blob/master/.appveyor.yml
-# Windows image is used 'just in case'. From what I gather the 
+# Windows image is used here 'just in case'. From what I gather the 
 # resulting .dll is system agnostic, but I don't really know.
-
-# run this build on any edit in the repo
+ 
+# run this build...
 on:
+  # on any edit in the repo
   push:
+  # or manually
   workflow_dispatch:
     inputs:
-      isFullBuild:
-        description: 'True: Build all files (docs, tests, examples), False: just dll'
-        required: true
+      extrasGen:
+        description: 'False: DLL only. True: Build extras (examples, tests, docs).'
+        required: false
         default: false
-
-env:
-  # Key for glfw version, and file that contains it
-  CMAKE_LISTS_FILE:      ./CMakeLists.txt
-  # build options
-  GLFW_SLIM_BUILD_FLAGS: -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF
-  GLFW_FULL_BUILD_FLAGS: -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON 
 
 defaults:
   run:
     shell: bash
-#     working-directory: $GITHUB_WORKSPACE
     
 jobs:
+
+#   prepare:
+#     runs-on: ubuntu-latest
+#     outputs:
+#       matrix_include: ${{ steps.prep.outputs.matrix }}
+#     steps:
+#       - id: prep
+#         shell: python
+#         run: \
+
   build_glfw:
     # The CMake configure and build commands are platform agnostic and should work equally
     # well on Windows or Mac.  You can convert this to a matrix build if you need
     # cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: windows-latest
-
+    
+    env:
+      test: ${{ ['extras'][INPUT_EXTRASGEN] }}
+    
+    strategy:
+      matrix:
+        target: ['dll', 'extras']
+        exclude: ${{ env.test }}
+        include: 
+            # Build dll
+          - target: 'dll'
+            build_flags: '-DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF'
+            # why is the .dll in a 'Debug' folder?
+            upload_target: ./build/src/Debug/glfw3.dll
+            upload_name_prefix: glfw3.dll
+            # Build examples, tests, docs
+          - target: 'extras'
+            build_flags: '-DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON'
+            upload_target: ./build/
+            upload_name_prefix: build_dir
+          
+            
+    ###
+    
     steps:
     
-      # checkout your project
+      # checkout your copy of glfw project
     - name: 'Project checkout ${{github.repository}}'
       uses: actions/checkout@v2
       
-    - name: Print job details
+    - name: Print job and repo details
       run: |
         [ -n ${{ github.event_name }} ] && echo 'Event: ${{ github.event_name }}'
         [ -n ${{ github.actor }} ]      && echo 'User: ${{ github.actor }}'
         echo "Repo head ref: ${{ github.head_ref }}"
-        echo "Full build:    $INPUT_ISFULLBUILD"
+        echo "Build flags:   ${{ build_flags }}"
+        
+        echo $(git status)
+        git remote add glfw_main https://github.com/glfw/glfw.git
+        echo $(git status -sb glfw_main/master)
+        echo $(git status glfw_main/master)
+        echo "localCMakeLists:   "$(git log -1 --pretty="format:%ci" CMakeLists.txt)
+        echo "remote CMakeLists: "$(git log -1 --pretty="format:%ci" glfwmain/master -- CMakeLists.txt)
     
     - name: debug
       run: |
@@ -62,35 +97,27 @@ jobs:
     - name: Set build options
       id: glfw_build_opts
       run: |
-        version=`awk -F " " '/GLFW VERSION/{print $(NF-2)}' < ${{ env.cmake_lists_file }}`
+        echo "::group::{cmake -N -L}"
+        cmake -N -L
+        echo "::group::{cmake -N -LA}"
+        echo "::endgroup::"
+        cmake -N -LA
+        echo "::group::{cmake -N -LH}"
+        echo "::endgroup::"
+        cmake -N -LH
+        echo "::endgroup::"
+        version=`awk -F " " '/GLFW VERSION/{print $(NF-2)}' < ./CMakeLists.txt`
+        echo "Extracted GLFW version $version"
         echo "::set-output name=version::$version"
-        
-        echo $version
-        echo "${{ env.GLFW_FULL_BUILD_FLAGS }}"
-        echo "${{ env.GLFW_SLIM_BUILD_FLAGS }}"
-        
-        if [ $INPUT_ISFULLBUILD ] 
-        then
-          echo "Creating full build"
-          echo "::set-output name=flags::${{ env.GLFW_FULL_BUILD_FLAGS }}"
-        else
-          echo "Creating slim (dll) build"
-          echo "::set-output name=flags::${{ env.GLFW_SLIM_BUILD_FLAGS }}"
-        fi
-        
-    - name: debug2
-      run: |
-        echo ${{ steps.glfw_build_opts.flags }}
-        
 
     - name: Create Build Environment
-      # create a folder - 'build' - into which GLFW will be build
+      # create a folder - 'build' - into which GLFW will be built
       run: cmake -E make_directory build
 
     - name: Configure CMake
       run: |
-        echo "::group::cmake, with flags ${{ steps.glfw_build_opts.outputs.flags }}"
-        cmake -S . -B build -G "Visual Studio 16 2019" ${{ steps.glfw_build_opts.outputs.flags }}
+        echo "::group::cmake, with flags ${{ matrix.build_flags }}"
+        cmake -S . -B build -G "Visual Studio 16 2019" ${{ matrix.build_flags }}
         echo "::endgroup::"
 
     - name: cmake build
@@ -99,16 +126,17 @@ jobs:
         echo "::group::cmake --build build"
         cmake --build build
         echo "::endgroup::"
-  
-    - uses: actions/upload-artifact@v2
-      # why is the .dll in a 'Debug' folder?
-      with:
-        path: ./build/src/Debug/glfw3.dll 
         
-    - name: 'Upload build folder v${{ steps.glfw_build_opts.outputs.version }}'
-      # 
+    - name: 'generate artifact tar for ${{ matrix.upload_target }}'
+      id: tar_gen
+      run: |
+        tar_name="${{ matrix.upload_name_prefix }}-v${{ steps.glfw_build_opts.outputs.version }}.tar"
+        tar -cvf $tar_name ${{ matrix.upload_target }}
+        echo "::set-output name=tar_name::$tar_name"
+        
+    - name: 'Upload artifact ${{ steps.tar_gen.outputs.tar_name }}'
       uses: actions/upload-artifact@v2
       with:
-        name: 'build_v${{ steps.glfw_build_opts.outputs.version }}'
-        path: ./build/ 
-        
+        name: '${{ steps.tar_gen.outputs.tar_name }}'
+        path: '${{ steps.tar_gen.outputs.tar_name }}'
+

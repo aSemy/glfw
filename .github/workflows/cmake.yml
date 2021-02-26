@@ -40,6 +40,13 @@ jobs:
       # checkout your project
     - name: 'Project checkout ${{github.repository}}'
       uses: actions/checkout@v2
+    
+    - name: test
+      run: |
+          echo pwd
+    - name: test2
+      run: |
+          echo ls $GITHUB_WORKSPACE
       
     - name: Set build options
       id: glfw_build_opts

@@ -17,10 +17,9 @@ on:
 
 env:
   # Key for glfw version, and file that contains it
-  CMAKE_LISTS_FILE:     ./CMakeLists.txt
-  GLFW_VERSION_KEY:     CMAKE_PROJECT_VERSION:STATIC
+  cmake_lists_file:     ./CMakeLists.txt
   # build options
-  GLFW_IS_FULL_BUILD:   ${{ github.event.inputs.fullBuild }}
+  glfw_is_full_build:   ${{ github.event.inputs.fullBuild }}
   GLFW_SLIM_BUILD_OPTS: -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF
   GLFW_FULL_BUILD_OPTS: -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON 
 
@@ -46,10 +45,13 @@ jobs:
     - name: Set build options
       id: glfw_build_opts
       run: |
-        version = awk -F " " '/GLFW VERSION/{print $(NF-2)}' < $CMAKE_LISTS_FILE
+        pwd
+        ls ${{ env.cmake_lists_file }}
+        more ${{ env.cmake_lists_file }}
+        version = awk -F " " '/GLFW VERSION/{print $(NF-2)}' < ${{ env.cmake_lists_file }}
         echo "::set-output name=version::$version"
-        if [ $GLFW_IS_FULL_BUILD ] then
-          echo "::set-output name=flags::$GLFW_FULL_BUILD_OPTS"
+        if [ ${{  env.glfw_is_full_build }} ] then
+          echo "::set-output name=flags::$GLFW_SLIM_BUILD_OPTS"
         else
           echo "::set-output name=flags::$GLFW_SLIM_BUILD_OPTS"
         

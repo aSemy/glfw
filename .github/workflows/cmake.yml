@@ -47,8 +47,8 @@ jobs:
                      "upload_target": "./build/",
                      "upload_name": "build_dir"
                   }
-              matrix.append(dll)
-              print('::set-output name={matrix}::{json.dumps(matrix)}')
+                  matrix.append(extras)
+             print('::set-output name={matrix}::{json.dumps(matrix)}')
 
   build_glfw:
     # The CMake configure and build commands are platform agnostic and should work equally
@@ -91,7 +91,7 @@ jobs:
         [ -n ${{ github.event_name }} ] && echo 'Event: ${{ github.event_name }}'
         [ -n ${{ github.actor }} ]      && echo 'User: ${{ github.actor }}'
         echo "Repo head ref: ${{ github.head_ref }}"
-        echo "Build flags:   ${{ build_flags }}"
+        echo "Build flags:   ${{ matrix.build_flags }}"
         
         echo $(git status)
         git remote add glfw_main https://github.com/glfw/glfw.git

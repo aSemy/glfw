@@ -13,8 +13,12 @@ on:
   # or manually
   workflow_dispatch:
     inputs:
-      extrasGen:
+      gen_extras:
         description: 'False: DLL only. True: Build extras (examples, tests, docs).'
+        required: false
+        default: false
+      debug_logs:
+        description: 'True to enable debug logging'
         required: false
         default: false
 
@@ -29,6 +33,7 @@ jobs:
     outputs:
       matrix_include: ${{ steps.prep.outputs.matrix }}
     steps:
+        # generate dynamic matrix because Github needs a while VM to run an if statement...
       - id: prep
         shell: python
         run: | 
@@ -40,7 +45,7 @@ jobs:
                 "upload_name_prefix": "glfw3.dll"
             }
             matrix.append(dll)
-            if [ ${{ github.event.inputs.extrasGen }} ] :
+            if [ is ${{ github.event.inputs.gen_extras }} ] :
                 extras = {
                    "build_flags": "-DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON",
                    "upload_target": "./build/",
@@ -48,9 +53,7 @@ jobs:
                 }
                 matrix.append(extras)
             matrix = json.dumps(matrix)
-            print(matrix)
             print(f"::set-output name=matrix::{matrix}")
-      - run: echo ${{ steps.prep.outputs.matrix }}
 
   build_glfw:
     # The CMake configure and build commands are platform agnostic and should work equally
@@ -63,24 +66,7 @@ jobs:
     strategy:
       matrix: 
         include: ${{fromJson(needs.prepare.outputs.matrix_include)}}
-    
-#       matrix:
-#         target: ['dll', 'extras']
-#         exclude: ${{ env.test }}
-#         include: 
-#             # Build dll
-#           - target: 'dll'
-#             build_flags: '-DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF'
-#             # why is the .dll in a 'Debug' folder?
-#             upload_target: ./build/src/Debug/glfw3.dll
-#             upload_name_prefix: glfw3.dll
-#             # Build examples, tests, docs
-#           - target: 'extras'
-#             build_flags: '-DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON'
-#             upload_target: ./build/
-#             upload_name_prefix: build_dir
           
-            
     ###
     
     steps:
@@ -90,6 +76,7 @@ jobs:
       uses: actions/checkout@v2
       
     - name: Print job and repo details
+      if: github.event.inputs.debug_logs
       run: |
         [ -n ${{ github.event_name }} ] && echo 'Event: ${{ github.event_name }}'
         [ -n ${{ github.actor }} ]      && echo 'User: ${{ github.actor }}'
@@ -104,6 +91,7 @@ jobs:
         echo "remote CMakeLists: "$(git log -1 --pretty="format:%ci" glfwmain/master -- CMakeLists.txt)
     
     - name: debug
+      if: github.event.inputs.debug_logs
       run: |
         pwd
         echo "::group::{tree pwd}"
@@ -114,18 +102,9 @@ jobs:
         head -5 ${{ env.cmake_lists_file }}
         echo "::endgroup::"
 
-    - name: Set build options
+    - name: Parse build options
       id: glfw_build_opts
       run: |
-        echo "::group::{cmake -N -L}"
-        cmake -N -L -B build
-        echo "::endgroup::"
-        echo "::group::{cmake -N -LA}"
-        cmake -N -LA -B build
-        echo "::endgroup::"
-        echo "::group::{cmake -N -LH}"
-        cmake -N -LH -B build
-        echo "::endgroup::"
         version=`awk -F " " '/GLFW VERSION/{print $(NF-2)}' < ./CMakeLists.txt`
         echo "Extracted GLFW version $version"
         echo "::set-output name=version::$version"
@@ -140,7 +119,8 @@ jobs:
         cmake -S . -B build -G "Visual Studio 16 2019" ${{ matrix.build_flags }}
         echo "::endgroup::"
 
-    - name: Set build options2
+    - name: Print cmake flags
+      if: github.event.inputs.debug_logs
       run: |
         echo "::group::{cmake -N -L}"
         cmake -N -L -B build

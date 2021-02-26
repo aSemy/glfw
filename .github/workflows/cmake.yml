@@ -19,14 +19,13 @@ env:
   # Key for glfw version, and file that contains it
   cmake_lists_file:     ./CMakeLists.txt
   # build options
-  glfw_is_full_build:   ${{ github.event.inputs.fullBuild }}
-  GLFW_SLIM_BUILD_OPTS: -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF
-  GLFW_FULL_BUILD_OPTS: -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON 
+  GLFW_SLIM_BUILD_FLAGS: -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF
+  GLFW_FULL_BUILD_FLAGS: -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON 
 
 defaults:
   run:
     shell: bash
-    working-directory: glfwworkflow
+    working-directory: ./glfwworkflow
     
 jobs:
   build_glfw:
@@ -50,10 +49,10 @@ jobs:
         more ${{ env.cmake_lists_file }}
         version = awk -F " " '/GLFW VERSION/{print $(NF-2)}' < ${{ env.cmake_lists_file }}
         echo "::set-output name=version::$version"
-        if [ ${{  env.glfw_is_full_build }} ] then
-          echo "::set-output name=flags::$GLFW_SLIM_BUILD_OPTS"
+        if [ <${{ <github.event.inputs.fullBuild> }}> ] then
+          echo "::set-output name=flags::$GLFW_SLIM_BUILD_FLAGS"
         else
-          echo "::set-output name=flags::$GLFW_SLIM_BUILD_OPTS"
+          echo "::set-output name=flags::$GLFW_FULL_BUILD_FLAGS"
         
     - name: Print job details
       run: |

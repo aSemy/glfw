@@ -40,6 +40,13 @@ jobs:
       # checkout your project
     - name: 'Project checkout ${{github.repository}}'
       uses: actions/checkout@v2
+      
+    - name: Print job details
+      run: |
+        [ -n ${{ github.event_name }} ] && echo 'Event: ${{ github.event_name }}'
+        [ -n ${{ github.actor }} ]      && echo 'User: ${{ github.actor }}'
+        echo "Repo head ref: ${{ github.head_ref }}"
+        echo "Full build:    $INPUT_ISFULLBUILD"
     
     - name: debug
       run: |
@@ -75,13 +82,6 @@ jobs:
       run: |
         echo ${{ steps.glfw_build_opts.flags }}
         
-    - name: Print job details
-      run: |
-        [ -n ${{ github.event_name }} ] && echo 'Event: ${{ github.event_name }}; fi'
-        [ -n ${{ github.actor }} ]      && echo 'User: ${{ github.actor }};       fi'
-        echo "Repo head ref: ${{ github.head_ref }}"
-        echo "Full build:    ${{ github.event.inputs.fullBuild }}"
-        echo "Build options: ${{ steps.glfw_build_opts }}"
 
     - name: Create Build Environment
       # create a folder - 'build' - into which GLFW will be build
@@ -89,8 +89,8 @@ jobs:
 
     - name: Configure CMake
       run: |
-        echo "::group::cmake, with flags ${{ steps.glfw_build_opts.flags }}"
-        cmake -S . -B build -G "Visual Studio 16 2019" ${{ steps.glfw_build_opts.flags }}
+        echo "::group::cmake, with flags ${{ steps.glfw_build_opts.outputs.flags }}"
+        cmake -S . -B build -G "Visual Studio 16 2019" ${{ steps.glfw_build_opts.outputs.flags }}
         echo "::endgroup::"
 
     - name: cmake build
@@ -103,12 +103,12 @@ jobs:
     - uses: actions/upload-artifact@v2
       # why is the .dll in a 'Debug' folder?
       with:
-        path: build/src/Debug/glfw3.dll 
+        path: ./build/src/Debug/glfw3.dll 
         
-    - name: 'Upload build folder v${{ steps.glfw_build_opts.version }}'
+    - name: 'Upload build folder v${{ steps.glfw_build_opts.outputs.version }}'
       # 
       uses: actions/upload-artifact@v2
       with:
-        name: 'build_v${{ steps.glfw_build_opts.version }}'
-        path: build/ 
+        name: 'build_v${{ steps.glfw_build_opts.outputs.version }}'
+        path: ./build/ 
         

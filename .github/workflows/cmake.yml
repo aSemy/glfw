@@ -48,9 +48,9 @@ jobs:
       run: |
         version = awk -F " " '/GLFW VERSION/{print $(NF-2)}' < $CMAKE_LISTS_FILE
         echo "::set-output name=version::$version"
-        if [ $GLFW_IS_FULL_BUILD ]
+        if [ $GLFW_IS_FULL_BUILD ] then
           echo "::set-output name=flags::$GLFW_FULL_BUILD_OPTS"
-        elif
+        else
           echo "::set-output name=flags::$GLFW_SLIM_BUILD_OPTS"
         
     - name: Print job details

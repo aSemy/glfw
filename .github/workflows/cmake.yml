@@ -49,7 +49,7 @@ jobs:
         more ${{ env.cmake_lists_file }}
         version = awk -F " " '/GLFW VERSION/{print $(NF-2)}' < ${{ env.cmake_lists_file }}
         echo "::set-output name=version::$version"
-        if [ <${{ <github.event.inputs.fullBuild> }}> ] then
+        if [ ${{ <github.event.inputs.fullBuild> }} ] then
           echo "::set-output name=flags::$GLFW_SLIM_BUILD_FLAGS"
         else
           echo "::set-output name=flags::$GLFW_FULL_BUILD_FLAGS"

@@ -24,14 +24,31 @@ defaults:
     
 jobs:
 
-#   prepare:
-#     runs-on: ubuntu-latest
-#     outputs:
-#       matrix_include: ${{ steps.prep.outputs.matrix }}
-#     steps:
-#       - id: prep
-#         shell: python
-#         run: \
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix_include: ${{ steps.prep.outputs.matrix }}
+    defaults:
+      run:
+        shell: python
+    steps:
+      - shell: python
+        run: | 
+            matrix = []
+            dll = {
+                "build_flags": "-DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF",
+                "upload_target": "./build/src/Debug/glfw3.dll",
+                "upload_prefix": "glfw3.dll"
+             }
+             matrix.append(dll)
+             if [ ${{ github.event.inputs.extrasGen }} == True ] :
+                 extras = {
+                     "build_flags": "-DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON",
+                     "upload_target": "./build/",
+                     "upload_name": "build_dir"
+                  }
+              matrix.append(dll)
+              print('::set-output name={matrix}::{json.dumps(matrix)}')
 
   build_glfw:
     # The CMake configure and build commands are platform agnostic and should work equally
@@ -40,25 +57,25 @@ jobs:
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: windows-latest
     
-    env:
-      test: ${{ ['extras'][INPUT_EXTRASGEN] }}
-    
     strategy:
       matrix:
-        target: ['dll', 'extras']
-        exclude: ${{ env.test }}
-        include: 
-            # Build dll
-          - target: 'dll'
-            build_flags: '-DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF'
-            # why is the .dll in a 'Debug' folder?
-            upload_target: ./build/src/Debug/glfw3.dll
-            upload_name_prefix: glfw3.dll
-            # Build examples, tests, docs
-          - target: 'extras'
-            build_flags: '-DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON'
-            upload_target: ./build/
-            upload_name_prefix: build_dir
+       includes: ${{fromJson(needs.prepare.outputs.matrix)}}
+    
+#       matrix:
+#         target: ['dll', 'extras']
+#         exclude: ${{ env.test }}
+#         include: 
+#             # Build dll
+#           - target: 'dll'
+#             build_flags: '-DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF'
+#             # why is the .dll in a 'Debug' folder?
+#             upload_target: ./build/src/Debug/glfw3.dll
+#             upload_name_prefix: glfw3.dll
+#             # Build examples, tests, docs
+#           - target: 'extras'
+#             build_flags: '-DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON'
+#             upload_target: ./build/
+#             upload_name_prefix: build_dir
           
             
     ###

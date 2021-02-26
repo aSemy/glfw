@@ -29,7 +29,8 @@ jobs:
     outputs:
       matrix_include: ${{ steps.prep.outputs.matrix }}
     steps:
-      - shell: python
+      - id: prep
+        shell: python
         run: | 
             import json
             matrix = []

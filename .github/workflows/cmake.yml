@@ -42,6 +42,7 @@ jobs:
       id: glfw_build_opts
       run: |
         version = awk -F " " '/GLFW VERSION/{print $(NF-2)}' < $CMAKE_LISTS_FILE
+        echo "::set-output name=version::$version"
         if [ $GLFW_IS_FULL_BUILD ]
           echo "::set-output name=flags::$GLFW_FULL_BUILD_OPTS"
         elif
@@ -71,22 +72,15 @@ jobs:
       # build into the 'build' directory
       run: cmake --build build
   
-    - name: Get glfw version
-      
-      run: |
-        v = awk -F= '/^$GLFW_VERSION_KEY/{print $NF}' $CMAKE_CACHE_FILE
-        echo "::set-output name=glfw_version::$v"
-        ver >> $GITHUB_ENV
-  
     - uses: actions/upload-artifact@v2
       # why is the .dll in a 'Debug' folder?
       with:
         path: build/src/Debug/glfw3.dll 
         
-    - name: 'Upload build folder v${{ env.glfw_version }}'
+    - name: 'Upload build folder v${{ steps.glfw_build_opts.version }}'
       # 
       uses: actions/upload-artifact@v2
       with:
-        name: 'build_v${{ env.glfw_version }}'
+        name: 'build_v${{ steps.glfw_build_opts.version }}'
         path: build/ 
         

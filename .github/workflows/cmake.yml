@@ -59,7 +59,7 @@ jobs:
       - id: outputs
         run: |
             from json import (loads as str2json, dumps as json2str)
-            includes = "${{ join(steps.*.outputs.include) }}"
+            includes = '${{ join(steps.*.outputs.include) }}'
             print(includes)
             includes = str2json(includes)
             print(includes)

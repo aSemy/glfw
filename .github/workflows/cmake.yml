@@ -67,7 +67,7 @@ jobs:
     needs: prepare
     steps: 
       - run: |
-          echo ${{ fromJson(needs.prepare.outputs.matrix_include) }}
+          echo ${{ needs.prepare.outputs.matrix_include }}
 
   build_glfw:
     # The CMake configure and build commands are platform agnostic and should work equally

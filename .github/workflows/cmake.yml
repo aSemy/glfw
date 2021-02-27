@@ -52,7 +52,7 @@ jobs:
             print(f"1: {v}")
             vv = '${{ true == github.event.inputs.gen_extras }}'
             print(f"2: {vv}")
-            vvv = strtobool('${{ true == github.event.inputs.gen_extras }}
+            vvv = strtobool('${{ true == github.event.inputs.gen_extras }}')
             print(f"3: {vvv}")
             if [ strtobool('${{ true == github.event.inputs.gen_extras }}') ] :
                 extras = {

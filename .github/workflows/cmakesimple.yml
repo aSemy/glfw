@@ -7,6 +7,7 @@ name: Build GLFW latest
 # resulting .dll is system agnostic, but I don't really know.
  
 on:
+  push:
   workflow_dispatch:
 
 defaults:

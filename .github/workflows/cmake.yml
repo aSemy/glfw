@@ -59,7 +59,7 @@ jobs:
       - id: result
         run: |
             includes = ${{ join(steps.*.outputs.include.value) }} 
-            # includes = '[ ${{ format('{0} join(steps.*.outputs.include.value) {1}', '[', ']' }} ]'
+            # includes = '[ {{ format('{0} join(steps.*.outputs.include.value) {1}', '[', ']' }} ]'
             # includes = '  '
             print(includes)
             print(f"::set-output name=matrix_include::'{includes}'")

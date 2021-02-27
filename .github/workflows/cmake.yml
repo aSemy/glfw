@@ -59,9 +59,11 @@ jobs:
       - id: outputs
         run: |
             from json import (loads as str2json, dumps as json2str)
-            includes = ${{ steps.*.outputs.include }}
+            includes = "${{ fromJSON(steps.*.outputs.include) }}"
             print(includes)
-            includes = [ str2json(i) for i in ${{ steps.*.outputs.include }} ]
+            includes = str2json(includes)
+            print(includes)
+            includes = [ str2json(i) for i in includes ]
             print(includes)
             includes = json2str(includes)
             print(includes)

@@ -50,13 +50,13 @@ jobs:
         cmake --build build
         echo "::endgroup::"
         
-        ###
+      ###
         
     - name: 'generate tar for dll'
       id: dll_tar
       run: |
         tar_name="dll-v${{ steps.glfw_build_opts.outputs.version }}.tar"
-        tar -cvf $tar_name -C build/src/Debug/glfw3.dll
+        tar -cvf $tar_name -C build/src/Debug glfw3.dll
         echo "::set-output name=tar_name::$tar_name"
         
     - name: 'Upload ${{ steps.dll_tar.outputs.tar_name }}'
@@ -65,7 +65,7 @@ jobs:
         name: ${{ steps.dll_tar.outputs.tar_name }}
         path: ${{ steps.dll_tar.outputs.tar_name }}
         
-        ###
+      ###
         
     - name: 'generate tar for build folder'
       id: build_tar

@@ -39,12 +39,8 @@ jobs:
       - id: prep
         shell: python
         run: | 
-            import sys
-            print("Python version")
-            print (sys.version)
-            print("Version info.")
-            print (sys.version_info)
             import json
+            from distutils.util import strtobool
             matrix = []
             dll = {
                 "build_flags": "-DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF",
@@ -52,7 +48,7 @@ jobs:
                 "upload_name_prefix": "glfw3.dll"
             }
             matrix.append(dll)
-            if [ distutils.util.strtobool(${{ true == github.event.inputs.gen_extras}}) ] :
+            if [ distutils.util.strtobool('${{ true == github.event.inputs.gen_extras }}#) ] :
                 extras = {
                    "build_flags": "-DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON",
                    "upload_target": "./build/",

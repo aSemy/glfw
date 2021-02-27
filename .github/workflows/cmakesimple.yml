@@ -90,10 +90,14 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release for v${{ steps.glfw_build_opts.outputs.version }} | ${{ github.ref }}
+        tag_name: "${{github.run_number}} ${{ github.ref }} ${{ github.sha }}"
+        release_name: "Release for v${{ steps.glfw_build_opts.outputs.version }} (${{ job.status }})"
         body: |
             Build flags: ${{ env.build_flags}}
+            
+            Run number: ${{github.run_number}}
+            github.ref: ${{ github.ref }} 
+            
         draft: false
         prerelease: true
         

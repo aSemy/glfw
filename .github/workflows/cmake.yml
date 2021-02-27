@@ -71,7 +71,7 @@ jobs:
     needs: prepare
     strategy:
       matrix: 
-        include: ${{ fromJson(needs.prepare.outputs.matrix_include) }}
+        include: ${{ [ fromJson(needs.prepare.outputs.matrix_include) ] }}
           
     ###
     

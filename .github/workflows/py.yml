@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults: 
       run: 
-        shell: python -m trace --trace {0}
+        shell: python
     steps:
       - name: python runner
         run: | 

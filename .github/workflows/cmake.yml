@@ -100,10 +100,10 @@ jobs:
         echo "cmakeListsLocal:  $cmakeListsLocal"
         echo "cmakeListsRemote: $cmakeListsRemote"
         echo "::endgroup::"
-        if [[ "$cmakeListsLocal" != "$cmakeListsRemote" ]]; then
-          echo "::error ::Version mismatch between this repo and the main glfw/glfw repo - pull new version?" 
-          echo "::error ::cmakeListsLocal:  $cmakeListsLocal"
-          echo "::error ::cmakeListsRemote: $cmakeListsRemote"
+        diff="$(git diff glfw_main/master -- CMakeLists.txt)"
+        if [[ ! -z "$diff" ]]; then
+          echo "::error ::Difference found between this repo and the main glfw/glfw repo - pull new version?" 
+          echo "::error ::$diff"
         fi
     
     - name: debug

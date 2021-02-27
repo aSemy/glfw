@@ -28,33 +28,50 @@ defaults:
     
 jobs:
 
+  # generate dynamic matrix because Github needs a whole VM to run an if statement...
   prepare:
     runs-on: ubuntu-latest
     outputs:
       matrix_include: ${{ steps.prep.outputs.matrix }}
-    steps:
-        # generate dynamic matrix because Github needs a while VM to run an if statement...
-      - id: prep
+    defaults: 
+      run: 
         shell: python
+    steps:
+      - id: extras_include
+        if: github.event.inputs.gen_extras
         run: | 
-            import json
-            from distutils.util import strtobool
-            matrix = []
+            from json import dumps as json2str
+            extras = {
+                   "build_flags": "-DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON",
+                   "upload_target": "./build/",
+                   "upload_name_prefix": "build_dir"
+                }
+            print(f"::set-output name=include::{json2str(extras)}")
+      - id: dll_include
+        run: | 
+            from json import dumps as json2str
             dll = {
                 "build_flags": "-DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF",
                 "upload_target": "./build/src/Debug/glfw3.dll",
                 "upload_name_prefix": "glfw3.dll"
             }
-            matrix.append(dll)
-            if '${{ github.event.inputs.gen_extras }}' and 'true'.lower() == '${{ github.event.inputs.gen_extras }}'.lower() :
-                extras = {
-                   "build_flags": "-DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON",
-                   "upload_target": "./build/",
-                   "upload_name_prefix": "build_dir"
-                }
-                matrix.append(extras)
-            matrix = json.dumps(matrix)
-            print(f"::set-output name=matrix::{matrix}")
+            print(f"::set-output name=include::{json2str(dll)}")
+      - id: outputs
+        run: |
+            from json import (loads as str2json, dumps as json2str)
+            includes = ${{ steps.*.outputs.include }}
+            print(includes)
+            includes = [ str2json(i) for i in ${{ steps.*.outputs.include }} ]
+            print(includes)
+            includes = json2str(includes)
+            print(includes)
+            print(f"::set-output name=include::{includes}")
+            
+  prepare_test:
+    runs-on: ubuntu-latest
+    needs: prepare
+    steps:
+      - run: echo ${{ fromJson(needs.prepare.outputs.matrix_include) }}
 
   build_glfw:
     # The CMake configure and build commands are platform agnostic and should work equally
@@ -63,10 +80,10 @@ jobs:
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: windows-latest
     needs: prepare
-    
+    if: false
     strategy:
       matrix: 
-        include: ${{fromJson(needs.prepare.outputs.matrix_include)}}
+        include: ${{ fromJson(needs.prepare.outputs.matrix_include )}}
           
     ###
     

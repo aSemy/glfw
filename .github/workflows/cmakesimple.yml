@@ -39,7 +39,7 @@ jobs:
 
     - name: Configure CMake
       run: |
-        echo "::group::cmake, with flags -DBUILD_SHARED_LIBS=ON"
+        echo "::group::cmake, with flags -DBUILD_SHARED_LIBS=ON -DGLFW_VULKAN_STATIC=ON"
         cmake -S . -B build -G "Visual Studio 16 2019" -DBUILD_SHARED_LIBS=ON
         echo "::endgroup::"
         

@@ -32,7 +32,7 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      matrix_include: ${{ steps.prep.outputs.matrix_include }}
+      matrix_include: ${{ steps.result.outputs.matrix_include }}
     defaults: 
       run: 
         shell: python
@@ -56,7 +56,7 @@ jobs:
                 "upload_name_prefix": "glfw3.dll"
             }
             print(f"::set-output name=include::{json2str(dll)}")
-      - id: outputs
+      - id: result
         run: |
             includes = '[ ${{ join(steps.*.outputs.include) }} ]'
             print(includes)

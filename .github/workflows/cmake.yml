@@ -61,7 +61,7 @@ jobs:
             from json import (loads as str2json, dumps as json2str)
             includes = '[ ${{ join(steps.*.outputs.include) }} ]'
             print(includes)
-            print(f"::set-output name=include::{includes}")
+            print(f"::set-output name=matrix::{includes}")
             
   prepare_test:
     runs-on: ubuntu-latest

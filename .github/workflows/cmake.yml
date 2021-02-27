@@ -90,6 +90,7 @@ jobs:
         echo "::group::{git info}"
         echo $(git status)
         git remote add glfw_main https://github.com/glfw/glfw.git
+        git fetch --all
         echo $(git status -sb glfw_main/master)
         echo $(git status glfw_main/master)
         cmakeListsLocal="$(git log -1 --pretty="format:%ci" CMakeLists.txt)

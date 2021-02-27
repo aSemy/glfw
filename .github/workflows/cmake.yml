@@ -58,8 +58,8 @@ jobs:
             print(f"::set-output name=include::{json2str(dll)}")
       - id: result
         run: |
-            include = '[ ${{ join(steps.*.outputs.include) }} ]'
-            print(f'include {include}')
+            includes = '[ ${{ join(steps.*.outputs.include) }} ]'
+            print(f'include {includes}')
             print(f"::set-output name=matrix_include::{includes}")
 
   test_prep:

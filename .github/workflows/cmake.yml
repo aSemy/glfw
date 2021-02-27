@@ -104,7 +104,6 @@ jobs:
           echo "::error ::Version mismatch between this repo $cmakeListsLocal and the main glfw/glfw repo" 
           echo "::error ::cmakeListsLocal:  $cmakeListsLocal"
           echo "::error ::cmakeListsRemote: $cmakeListsRemote"
-          echo "::error ::cmakeListsRemote: $cmakeListsRemote"
         fi
     
     - name: debug

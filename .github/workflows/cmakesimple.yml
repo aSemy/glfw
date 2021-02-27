@@ -90,10 +90,13 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: "${{github.run_number}} ${{ github.ref }} ${{ github.sha }}"
+        tag_name: "${{github.run_number}}_${{ github.ref }}_${{ github.sha }}"
         release_name: "Release for v${{ steps.glfw_build_opts.outputs.version }} (${{ job.status }})"
         body: |
             Build flags: ${{ env.build_flags}}
+            
+            ${{ steps.dll_tar.outputs.tar_name   }} hash: ${{ hashFiles(steps.dll_tar.outputs.tar_name)   }}
+            ${{ steps.build_tar.outputs.tar_name }} hash: ${{ hashFiles(steps.build_tar.outputs.tar_name) }}
             
             Run number: ${{github.run_number}}
             github.ref: ${{ github.ref }} 

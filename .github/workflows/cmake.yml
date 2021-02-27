@@ -9,7 +9,7 @@ name: Build GLFW latest
 # run this build...
 on:
   # on any edit in the repo
-  push:
+  # push:
   # or manually
   workflow_dispatch:
     inputs:

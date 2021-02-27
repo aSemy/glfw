@@ -1,0 +1,18 @@
+
+
+name: My Workflow
+
+on:
+  workflow_dispatch:
+    
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    defaults: 
+      run: 
+        shell: python -m trace --trace {0}
+    steps:
+      - name: python runner
+        run: | 
+            variable = 'world'
+            print(f'hello {variable}')

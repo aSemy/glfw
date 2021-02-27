@@ -101,7 +101,7 @@ jobs:
         echo "cmakeListsRemote: $cmakeListsRemote"
         echo "::endgroup::"
         if [[ "$cmakeListsLocal" != "$cmakeListsRemote" ]]; then
-          echo "::error ::Version mismatch between this repo $cmakeListsLocal and the main glfw/glfw repo" 
+          echo "::error ::Version mismatch between this repo and the main glfw/glfw repo - pull new version?" 
           echo "::error ::cmakeListsLocal:  $cmakeListsLocal"
           echo "::error ::cmakeListsRemote: $cmakeListsRemote"
         fi

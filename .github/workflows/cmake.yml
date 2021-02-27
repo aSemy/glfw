@@ -78,7 +78,7 @@ jobs:
     - name: 'Project checkout ${{github.repository}}'
       uses: actions/checkout@v2
       
-    - name: Print job and repo details
+    - name: Print job details
       run: |
         echo "::group::{job info}"
         [ -n ${{ github.event_name }} ] && echo 'Event: ${{ github.event_name }}'
@@ -86,7 +86,9 @@ jobs:
         echo "Repo head ref: ${{ github.head_ref }}"
         echo "Build flags:   ${{ matrix.build_flags }}"
         echo "::endgroup::"
-        
+      
+    - name: Print git details
+      run: |
         echo "::group::{git info}"
         echo $(git status)
         git remote add glfw_main https://github.com/glfw/glfw.git
@@ -99,10 +101,10 @@ jobs:
         echo "cmakeListsRemote: $cmakeListsRemote"
         echo "::endgroup::"
         if [[ "$cmakeListsLocal" != "$cmakeListsRemote" ]]; then
-          echo "::error ::Version mismatch between \
-                          this repo $cmakeListsLocal \
-                          and the main glfw/glfw repo $cmakeListsRemote \ 
-                          Pull new version?"
+          echo "::error ::Version mismatch between this repo $cmakeListsLocal and the main glfw/glfw repo" 
+          echo "::error ::cmakeListsLocal:  $cmakeListsLocal"
+          echo "::error ::cmakeListsRemote: $cmakeListsRemote"
+          echo "::error ::cmakeListsRemote: $cmakeListsRemote"
         fi
     
     - name: debug

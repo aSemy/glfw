@@ -29,7 +29,7 @@ jobs:
       id: glfw_build_opts
       run: |
         version=`awk -F " " '/GLFW VERSION/{print $(NF-2)}' < ./CMakeLists.txt`
-        version=`echo $version | xargs | tr -s -c '[:alnum:]' _`
+        version=`echo $version | tr -cd '[:graph:]' | tr -sc '[:alnum:]' _`
         echo "Extracted GLFW version $version"
         echo "::set-output name=version::$version"
 

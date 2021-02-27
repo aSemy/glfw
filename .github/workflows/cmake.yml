@@ -35,7 +35,7 @@ jobs:
       matrix_include: ${{ steps.result.outputs.matrix_include }}
     defaults: 
       run: 
-        shell: python
+        shell: python -m trace {0}
     steps:
       - id: extras_include
 #         if: github.event.inputs.gen_extras
@@ -58,7 +58,9 @@ jobs:
             print(f"::set-output name=include::{json2str(dll)}")
       - id: result
         run: |
-            includes = ' ${{ join(steps.*.outputs.include) }} '
+            includes = ${{ join(steps.*.outputs.include.value) }} 
+            # includes = '[ ${{ format('{0} join(steps.*.outputs.include.value) {1}', '[', ']' }} ]'
+            # includes = '  '
             print(includes)
             print(f"::set-output name=matrix_include::'{includes}'")
 

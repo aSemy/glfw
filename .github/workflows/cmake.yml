@@ -32,8 +32,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix_include: ${{ steps.prep.outputs.matrix }}
-#     env:
-#       isGenExtraBoolean: ${{ github.event.inputs.gen_extras }}
+    env:
+      extraBoolean: ${{ github.event.inputs.gen_extras }}
     steps:
         # generate dynamic matrix because Github needs a while VM to run an if statement...
       - id: prep
@@ -48,7 +48,7 @@ jobs:
                 "upload_name_prefix": "glfw3.dll"
             }
             matrix.append(dll)
-            if strtobool('${{ true == github.event.inputs.gen_extras }}') :
+            if strtobool('${{ true == env.extraBoolean }}') :
                 extras = {
                    "build_flags": "-DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON",
                    "upload_target": "./build/",

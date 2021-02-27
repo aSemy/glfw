@@ -58,6 +58,8 @@ jobs:
             print(f"::set-output name=include::{json2str(dll)}")
       - id: result
         run: |
+            print('steps.*.outputs.include ${{ toJson(steps.*.outputs.include) }}')
+            print('steps.*.outputs ${{ toJson(steps.*.outputs) }}')
             includes = ${{ join(steps.*.outputs.include.value) }} 
             # includes = '[ {{ format('{0} join(steps.*.outputs.include.value) {1}', '[', ']' }} ]'
             # includes = '  '

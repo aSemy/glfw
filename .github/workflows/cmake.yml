@@ -79,19 +79,25 @@ jobs:
       uses: actions/checkout@v2
       
     - name: Print job and repo details
-      if: github.event.inputs.debug_logs
       run: |
+        echo "::group::{job info}"
         [ -n ${{ github.event_name }} ] && echo 'Event: ${{ github.event_name }}'
         [ -n ${{ github.actor }} ]      && echo 'User: ${{ github.actor }}'
         echo "Repo head ref: ${{ github.head_ref }}"
         echo "Build flags:   ${{ matrix.build_flags }}"
+        echo "::endgroup::"
         
+        echo "::group::{git info}"
         echo $(git status)
         git remote add glfw_main https://github.com/glfw/glfw.git
         echo $(git status -sb glfw_main/master)
         echo $(git status glfw_main/master)
-        echo "localCMakeLists:   "$(git log -1 --pretty="format:%ci" CMakeLists.txt)
-        echo "remote CMakeLists: "$(git log -1 --pretty="format:%ci" glfwmain/master -- CMakeLists.txt)
+        cmakeListsLocal="$(git log -1 --pretty="format:%ci" CMakeLists.txt)
+        cmakeListsRemote="$(git log -1 --pretty="format:%ci" glfwmain/master -- CMakeLists.txt)
+        echo "local cmake: $cmakeListsLocal vs remote: $cmakeListsRemote"
+        if [[ "$cmakeListsLocal" != "$cmakeListsRemote" ]]; then
+          echo "::error ::Version mismatch between this repo and the main glfw/glfw repo - pull new version?"
+        fi
     
     - name: debug
       if: github.event.inputs.debug_logs

@@ -1,0 +1,60 @@
+name: Build GLFW latest
+
+# Build https://github.com/glfw/glfw/
+# The cmake commands are from:
+# https://github.com/glfw/glfw/blob/master/.appveyor.yml
+# Windows image is used here 'just in case'. From what I gather the 
+# resulting .dll is system agnostic, but I don't really know.
+ 
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+    
+jobs:
+
+  build_glfw:
+    # The CMake configure and build commands are platform agnostic and should work equally
+    # well on Windows or Mac.  You can convert this to a matrix build if you need
+    # cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: windows-latest
+          
+    steps:
+    
+      # checkout your copy of glfw project
+    - name: 'Project checkout ${{github.repository}}'
+      uses: actions/checkout@v2
+          
+    - name: Parse build options
+      id: glfw_build_opts
+      run: |
+        version=`awk -F " " '/GLFW VERSION/{print $(NF-2)}' < ./CMakeLists.txt`
+        version=`echo $version | xargs | tr -s -c '[:alnum:]' _`
+        echo "Extracted GLFW version $version"
+        echo "::set-output name=version::$version"
+
+    - name: Create Build Environment
+      # create a folder - 'build' - into which GLFW will be built
+      run: cmake -E make_directory build
+
+    - name: Configure CMake
+      run: |
+        echo "::group::cmake, with flags -DBUILD_SHARED_LIBS=ON
+        cmake -S . -B build -G "Visual Studio 16 2019" -DBUILD_SHARED_LIBS=ON
+        echo "::endgroup::"
+        
+    - name: cmake build
+      # build into the 'build' directory
+      run: |
+        echo "::group::cmake --build build"
+        cmake --build build
+        echo "::endgroup::"
+        
+    - name: 'Upload glfw3.dll v${{ steps.glfw_build_opts.outputs.version }}'
+      uses: actions/upload-artifact@v2
+      with:
+        name: glfw3_dll-v${{ steps.glfw_build_opts.outputs.version }}
+        path: build/src/Debug/glfw3.dll

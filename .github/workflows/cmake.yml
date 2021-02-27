@@ -59,11 +59,11 @@ jobs:
       - id: result
         run: |
             includes = '[ ${{ join(steps.*.outputs.include) }} ]'
-            print(f'include {includes}')
             print(f"::set-output name=matrix_include::{includes}")
 
-  test_prep:
+  prepare_debug:
     runs-on: ubuntu-latest
+    if: github.event.inputs.debug_logs
     needs: prepare
     steps:
       - run: |

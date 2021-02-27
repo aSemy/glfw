@@ -59,7 +59,7 @@ jobs:
         tar -cvf $tar_name -C build/src/Debug glfw3.dll
         echo "::set-output name=tar_name::$tar_name"
         
-    - name: 'Upload ${{ steps.dll_tar.outputs.tar_name }}'
+    - name: 'Upload artifact ${{ steps.dll_tar.outputs.tar_name }}'
       uses: actions/upload-artifact@v2
       with:
         name: ${{ steps.dll_tar.outputs.tar_name }}
@@ -74,8 +74,49 @@ jobs:
         tar -cvf $tar_name -C build $(ls build)
         echo "::set-output name=tar_name::$tar_name"
         
-    - name: 'Upload ${{ steps.build_tar.outputs.tar_name }}'
+    - name: 'Upload artifact ${{ steps.build_tar.outputs.tar_name }}'
       uses: actions/upload-artifact@v2
       with:
         name: ${{ steps.build_tar.outputs.tar_name }}
         path: ${{ steps.build_tar.outputs.tar_name }}
+        
+        
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release for v${{ steps.glfw_build_opts.outputs.version }} | ${{ github.ref }}
+        draft: false
+        prerelease: true
+        
+    - name: 'Upload Release Asset ${{ steps.dll_tar.outputs.tar_name }}'
+      id: upload-release-asset-dll-tar
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, 
+        # which include a `upload_url`. See this blog post for more info: 
+        # https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ${{ steps.dll_tar.outputs.tar_name }}
+        asset_name: ${{ steps.dll_tar.outputs.tar_name }}
+        asset_content_type: application/x-tar
+
+        
+    - name: 'Upload Release Asset ${{ steps.build_tar.outputs.tar_name }}'
+      id: upload-release-asset-build-tar
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} 
+        # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, 
+        # which include a `upload_url`. See this blog post for more info: 
+        # https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ${{ steps.build_tar.outputs.tar_name }}
+        asset_name: ${{ steps.build_tar.outputs.tar_name }}
+        asset_content_type: application/x-tar

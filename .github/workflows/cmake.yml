@@ -46,7 +46,7 @@ jobs:
                 "upload_name_prefix": "glfw3.dll"
             }
             matrix.append(dll)
-            if '${{ github.event.inputs.gen_extras }}' and 'true'.lower() == '${{ github.event.inputs.gen_extras }}' :
+            if '${{ github.event.inputs.gen_extras }}' and 'true'.lower() == '${{ github.event.inputs.gen_extras }}'.lower() :
                 extras = {
                    "build_flags": "-DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON",
                    "upload_target": "./build/",

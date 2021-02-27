@@ -93,8 +93,9 @@ jobs:
         echo $(git status -sb glfw_main/master)
         echo $(git status glfw_main/master)
         cmakeListsLocal="$(git log -1 --pretty="format:%ci" CMakeLists.txt)
-        cmakeListsRemote="$(git log -1 --pretty="format:%ci" glfwmain/master -- CMakeLists.txt)
+        cmakeListsRemote="$(git log -1 --pretty="format:%ci" glfw_main/master -- CMakeLists.txt)
         echo "local cmake: $cmakeListsLocal vs remote: $cmakeListsRemote"
+        echo "::endgroup::"
         if [[ "$cmakeListsLocal" != "$cmakeListsRemote" ]]; then
           echo "::error ::Version mismatch between this repo and the main glfw/glfw repo - pull new version?"
         fi

@@ -32,7 +32,7 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      matrix_include: ${{ steps.prep.outputs.matrix }}
+      matrix_include: ${{ steps.prep.outputs.matrix_include }}
     defaults: 
       run: 
         shell: python
@@ -59,15 +59,16 @@ jobs:
       - id: outputs
         run: |
             from json import (loads as str2json, dumps as json2str)
-            includes = '[ ${{ join(steps.*.outputs.include) }} ]'
+            includes = '[ ${{ join(steps.*include.outputs.include) }} ]'
             print(includes)
-            print(f"::set-output name=matrix::{includes}")
+            print(f"::set-output name=matrix_include::{includes}")
             
   prepare_test:
     runs-on: ubuntu-latest
     needs: prepare
     steps:
-      - run: echo ${{ fromJson(needs.prepare.outputs.matrix_include) }}
+      - run: |
+          echo '${{ fromJson(needs.prepare.outputs.matrix_include) }}'
 
   build_glfw:
     # The CMake configure and build commands are platform agnostic and should work equally

@@ -60,7 +60,14 @@ jobs:
         run: |
             includes = '[ ${{ join(steps.*.outputs.include) }} ]'
             print(includes)
-            print(f"::set-output name=matrix_include::{includes}")
+            print(f"::set-output name=matrix_include::'{includes}'")
+
+  test_prepare:
+    runs-on: ubuntu-latest
+    needs: prepare
+    steps: 
+      - run: |
+          echo ${{ fromJson(needs.prepare.outputs.matrix_include) }}
 
   build_glfw:
     # The CMake configure and build commands are platform agnostic and should work equally
@@ -69,6 +76,7 @@ jobs:
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: windows-latest
     needs: prepare
+    if: false
     strategy:
       matrix: 
         include: ${{ fromJson(needs.prepare.outputs.matrix_include) }}

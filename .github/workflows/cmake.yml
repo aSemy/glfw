@@ -35,7 +35,7 @@ jobs:
       matrix_include: ${{ steps.result.outputs.matrix_include }}
     defaults: 
       run: 
-        shell: python -m trace {0}
+        shell: python -m trace --trace {0}
     steps:
       - id: extras_include
 #         if: github.event.inputs.gen_extras

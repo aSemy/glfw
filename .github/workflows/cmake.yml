@@ -38,7 +38,7 @@ jobs:
         shell: python -m trace --trace {0}
     steps:
       - id: extras_include
-#         if: github.event.inputs.gen_extras
+        if: github.event.inputs.gen_extras
         run: | 
             from json import dumps as json2str
             extras = {

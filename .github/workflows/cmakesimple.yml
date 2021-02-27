@@ -55,3 +55,29 @@ jobs:
       with:
         name: glfw3_dll-v${{ steps.glfw_build_opts.outputs.version }}
         path: build/src/Debug/glfw3.dll
+        
+    - name: 'generate tar for build folder'
+      id: dll_tar
+      run: |
+        tar_name="dll-v${{ steps.glfw_build_opts.outputs.version }}.tar"
+        tar -cvf $tar_name -C build/src/Debug/glfw3.dll $(ls build/src/Debug/glfw3.dll)
+        echo "::set-output name=tar_name::$tar_name"
+        
+    - name: 'Upload ${{ steps.dll_tar.outputs.tar_name }}'
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ steps.dll_tar.outputs.tar_name }}
+        path: ${{ steps.dll_tar.outputs.tar_name }}
+        
+    - name: 'generate tar for build folder'
+      id: build_tar
+      run: |
+        tar_name="build-v${{ steps.glfw_build_opts.outputs.version }}.tar"
+        tar -cvf $tar_name -C build $(ls build)
+        echo "::set-output name=tar_name::$tar_name"
+        
+    - name: 'Upload ${{ steps.build_tar.outputs.tar_name }}'
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ steps.build_tar.outputs.tar_name }}
+        path: ${{ steps.build_tar.outputs.tar_name }}

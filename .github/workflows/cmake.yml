@@ -43,7 +43,7 @@ jobs:
             from json import dumps as json2str
             extras = {
                    "build_flags": "-DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON",
-                   "upload_target": "./build/",
+                   "upload_target": "build/",
                    "upload_name_prefix": "build_dir"
                 }
             print(f"::set-output name=include::{json2str(extras)}")
@@ -52,7 +52,7 @@ jobs:
             from json import dumps as json2str
             dll = {
                 "build_flags": "-DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF",
-                "upload_target": "./build/src/Debug/glfw3.dll",
+                "upload_target": "build/src/Debug/glfw3.dll",
                 "upload_name_prefix": "glfw3.dll"
             }
             print(f"::set-output name=include::{json2str(dll)}")

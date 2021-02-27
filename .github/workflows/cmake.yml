@@ -1,4 +1,4 @@
-name: Build GLFW latest
+name: Build GLFW latest (crazy complicated version)
 
 # Build https://github.com/glfw/glfw/
 # The cmake commands are from:

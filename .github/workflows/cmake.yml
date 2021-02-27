@@ -38,7 +38,7 @@ jobs:
         shell: python
     steps:
       - id: extras_include
-        if: github.event.inputs.gen_extras
+#         if: github.event.inputs.gen_extras
         run: | 
             from json import dumps as json2str
             extras = {
@@ -58,7 +58,7 @@ jobs:
             print(f"::set-output name=include::{json2str(dll)}")
       - id: result
         run: |
-            includes = '[ ${{ join(steps.*.outputs.include) }} ]'
+            includes = ' ${{ join(steps.*.outputs.include) }} '
             print(includes)
             print(f"::set-output name=matrix_include::'{includes}'")
 

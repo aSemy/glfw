@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       gen_extras:
-        description: 'False: DLL only. True: Build extras (examples, tests, docs).'
+        description: 'False: DLL only. True: Build dll plus extras (examples, tests, docs).'
         required: false
         default: false
       debug_logs:
@@ -48,7 +48,7 @@ jobs:
             matrix.append(dll)
             if '${{ github.event.inputs.gen_extras }}' and 'true'.lower() == '${{ github.event.inputs.gen_extras }}'.lower() :
                 extras = {
-                   "build_flags": "-DBUILD_SHARED_LIBS=OFF -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON",
+                   "build_flags": "-DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=ON  -DGLFW_BUILD_TESTS=ON  -DGLFW_BUILD_DOCS=ON",
                    "upload_target": "./build/",
                    "upload_name_prefix": "build_dir"
                 }

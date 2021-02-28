@@ -47,16 +47,16 @@ jobs:
     - name: Configure CMake
       run: |
         echo "::group::cmake, with flags ${{ env.build_flags}}"
-        cmake -S . -B build -G "Visual Studio 16 2019" ${{ env.build_flags}} --log-level=DEBUG
+        cmake --log-level=DEBUG -S . -B build -G "Visual Studio 16 2019" ${{ env.build_flags}} 
         echo "::endgroup::"
     
     - name: cmake -LAH
       run: |
         echo "::group::cmake -LAH"
-        cmake -LAH  --log-level=DEBUG
+        cmake --log-level=DEBUG -LAH  
         echo "::endgroup::"
         echo "::group::cmake -B build -LAH"
-        cmake -B build -LAH  --log-level=DEBUG
+        cmake --log-level=DEBUG -B build -LAH 
         echo "::endgroup::"
         
     
@@ -64,7 +64,7 @@ jobs:
       # build into the 'build' directory
       run: |
         echo "::group::cmake --build build" 
-        cmake --build build  --log-level=DEBUG
+        cmake  --log-level=DEBUG --build build 
         echo "::endgroup::"
         
 ######## make and upload tars for dll and build folder

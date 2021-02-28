@@ -39,7 +39,7 @@ jobs:
 
 
 ####### run the build
-        
+   
 #     - name: Create Build Environment
       # create a folder - 'build' - into which GLFW will be built
 #       run: cmake -E make_directory build
@@ -47,14 +47,24 @@ jobs:
     - name: Configure CMake
       run: |
         echo "::group::cmake, with flags ${{ env.build_flags}}"
-        cmake -S . -B build -G "Visual Studio 16 2019" ${{ env.build_flags}}
+        cmake -S . -B build -G "Visual Studio 16 2019" ${{ env.build_flags}} --log-level=DEBUG
+        echo "::endgroup::"
+    
+    - name: cmake -LAH
+      run: |
+        echo "::group::cmake -LAH"
+        cmake -LAH  --log-level=DEBUG
+        echo "::endgroup::"
+        echo "::group::cmake -B build -LAH"
+        cmake -B build -LAH  --log-level=DEBUG
         echo "::endgroup::"
         
+    
     - name: cmake build
       # build into the 'build' directory
       run: |
-        echo "::group::cmake --build build"
-        cmake --build build
+        echo "::group::cmake --build build" 
+        cmake --build build  --log-level=DEBUG
         echo "::endgroup::"
         
 ######## make and upload tars for dll and build folder

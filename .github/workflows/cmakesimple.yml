@@ -47,16 +47,16 @@ jobs:
     - name: Configure CMake
       run: |
         echo "::group::cmake, with flags ${{ env.build_flags}}"
-        cmake --log-level=DEBUG -S . -B build -G "Visual Studio 16 2019" ${{ env.build_flags}} 
+        cmake -DCMAKE_MESSAGE_LOG_LEVEL=DEBUG -S . -B build -G "Visual Studio 16 2019" ${{ env.build_flags}} 
         echo "::endgroup::"
     
     - name: cmake -LAH
       run: |
         echo "::group::cmake -LAH"
-        cmake --log-level=DEBUG -LAH  
+        cmake -LAH  
         echo "::endgroup::"
         echo "::group::cmake -B build -LAH"
-        cmake --log-level=DEBUG -B build -LAH 
+        cmake -B build -LAH 
         echo "::endgroup::"
         
     
@@ -64,7 +64,7 @@ jobs:
       # build into the 'build' directory
       run: |
         echo "::group::cmake --build build" 
-        cmake  --log-level=DEBUG --build build 
+        cmake --build build 
         echo "::endgroup::"
         
 ######## make and upload tars for dll and build folder
@@ -73,6 +73,7 @@ jobs:
       id: dll_tar
       run: |
         tar_name="dll-v${{ steps.glfw_build_opts.outputs.version }}.tar"
+        find ./build -name "*dll" -print0 | tar -cvf $tar_name --null -T -
         tar -cvf $tar_name -C build/src/Debug glfw3.dll
         echo "::set-output name=tar_name::$tar_name"
         

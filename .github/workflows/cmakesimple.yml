@@ -15,7 +15,8 @@ defaults:
     shell: bash
     
 env:
-  build_flags: -DBUILD_SHARED_LIBS=ON
+  build_flags: -D CMAKE_MESSAGE_LOG_LEVEL=DEBUG -D BUILD_SHARED_LIBS=ON -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL 
+  # CMAKE_BUILD_TYPE=Release -DCMAKE_MESSAGE_LOG_LEVEL=DEBUG
     
 jobs:
 
@@ -47,7 +48,7 @@ jobs:
     - name: Configure CMake
       run: |
         echo "::group::cmake, with flags ${{ env.build_flags}}"
-        cmake -DCMAKE_MESSAGE_LOG_LEVEL=DEBUG -S . -B build -G "Visual Studio 16 2019" ${{ env.build_flags}} 
+        cmake -S . -B build -G "Visual Studio 16 2019" ${{ env.build_flags}}
         echo "::endgroup::"
     
     - name: cmake -LAH
@@ -73,7 +74,7 @@ jobs:
       id: dll_tar
       run: |
         tar_name="dll-v${{ steps.glfw_build_opts.outputs.version }}.tar"
-        find ./build -name "*dll" -print0 | tar -cvf $tar_name --null -T -
+        find build -name "*dll" -print0 | tar -cvf $tar_name --null -T -
         tar -cvf $tar_name -C build/src/Debug glfw3.dll
         echo "::set-output name=tar_name::$tar_name"
         

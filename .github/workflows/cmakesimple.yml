@@ -24,10 +24,11 @@ jobs:
           
     steps:
     
-      # checkout your copy of glfw project
+      # checkout copy of glfw project
     - name: 'Project checkout ${{github.repository}}'
       uses: actions/checkout@v2
-          
+      
+      # get the version number for glfw
     - name: Parse build options
       id: glfw_build_opts
       run: |
@@ -36,6 +37,9 @@ jobs:
         echo "Extracted GLFW version $version"
         echo "::set-output name=version::$version"
 
+
+####### run the build
+        
 #     - name: Create Build Environment
       # create a folder - 'build' - into which GLFW will be built
 #       run: cmake -E make_directory build
@@ -53,7 +57,7 @@ jobs:
         cmake --build build
         echo "::endgroup::"
         
-      ###
+######## make and upload tars for dll and build folder
         
     - name: 'generate tar for dll'
       id: dll_tar
@@ -68,8 +72,6 @@ jobs:
         name: ${{ steps.dll_tar.outputs.tar_name }}
         path: ${{ steps.dll_tar.outputs.tar_name }}
         
-      ###
-        
     - name: 'generate tar for build folder'
       id: build_tar
       run: |
@@ -82,8 +84,9 @@ jobs:
       with:
         name: ${{ steps.build_tar.outputs.tar_name }}
         path: ${{ steps.build_tar.outputs.tar_name }}
-        
-        
+
+######## create a release, upload artifacts
+
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -93,10 +96,10 @@ jobs:
         tag_name: "${{github.run_number}}_${{ github.ref }}_${{ github.sha }}"
         release_name: "Release for v${{ steps.glfw_build_opts.outputs.version }} (${{ job.status }})"
         body: |
-            Build flags: ${{ env.build_flags}}
+            Build flags: `${{ env.build_flags}}`
             
-            ${{ steps.dll_tar.outputs.tar_name   }} hash: ${{ hashFiles(steps.dll_tar.outputs.tar_name)   }}
-            ${{ steps.build_tar.outputs.tar_name }} hash: ${{ hashFiles(steps.build_tar.outputs.tar_name) }}
+            ${{ steps.dll_tar.outputs.tar_name   }} hash: `${{ hashFiles(steps.dll_tar.outputs.tar_name)   }}`
+            ${{ steps.build_tar.outputs.tar_name }} hash: `${{ hashFiles(steps.build_tar.outputs.tar_name) }}`
             
             Run number: ${{github.run_number}}
             github.ref: ${{ github.ref }} 
@@ -111,9 +114,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, 
-        # which include a `upload_url`. See this blog post for more info: 
-        # https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
         asset_path: ${{ steps.dll_tar.outputs.tar_name }}
         asset_name: ${{ steps.dll_tar.outputs.tar_name }}
         asset_content_type: application/x-tar
@@ -126,9 +126,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, 
-        # which include a `upload_url`. See this blog post for more info: 
-        # https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
         asset_path: ${{ steps.build_tar.outputs.tar_name }}
         asset_name: ${{ steps.build_tar.outputs.tar_name }}
         asset_content_type: application/x-tar
